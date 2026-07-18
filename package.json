@@ -17,7 +17,9 @@
     "test:watch": "vitest",
     "test:coverage": "vitest run --coverage",
     "typecheck": "tsc --noEmit",
-    "prepare": "husky"
+    "prepare": "husky",
+    "auth": "tsx src/cli/auth.ts",
+    "sync": "tsx src/cli/sync.ts"
   },
   "devDependencies": {
     "@eslint/js": "9.22.0",

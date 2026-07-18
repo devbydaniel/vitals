@@ -75,7 +75,7 @@ cd ~/dev/dbd/vitals && npm run lint && npm run typecheck && npm test
 
 **DO NOT touch:** `src/cli/`, `src/sync.ts`, `migrations/`, `~/homelab/`
 
-### Step 4 — Bootstrap auth CLI
+### ✅ Step 4 — Bootstrap auth CLI
 
 **Scope:** ONLY `~/dev/dbd/vitals/src/cli/auth.ts` + tests + `package.json` (bin/script entry)
 
@@ -91,7 +91,7 @@ cd ~/dev/dbd/vitals && npm run lint && npm run typecheck && npm test
 
 **DO NOT touch:** `src/sync.ts`, `migrations/`, `~/homelab/`
 
-### Step 5 — Sync engine + cron entrypoint
+### ✅ Step 5 — Sync engine + cron entrypoint
 
 **Scope:** ONLY `~/dev/dbd/vitals/src/{sync.ts,cli/sync.ts}` + tests + `package.json` (script entry)
 
@@ -110,7 +110,7 @@ cd ~/dev/dbd/vitals && docker compose up -d && npm run migrate up && npm run lin
 
 **DO NOT touch:** `migrations/` (views come in step 6), `~/homelab/`
 
-### Step 6 — SQL views (interpretation layer)
+### ✅ Step 6 — SQL views (interpretation layer)
 
 **Scope:** ONLY `~/dev/dbd/vitals/migrations/` (new migration)
 

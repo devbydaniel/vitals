@@ -59,6 +59,13 @@ export default tseslint.config(
       'sonarjs/todo-tag': 'warn',
     },
   },
+  // CLI entrypoints: console output is the interface
+  {
+    files: ['src/cli/**/*.ts'],
+    rules: {
+      'no-console': 'off',
+    },
+  },
   // Relaxed rules for test files
   {
     files: ['**/*.test.ts', '**/*.spec.ts'],
