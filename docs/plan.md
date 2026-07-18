@@ -33,7 +33,7 @@ cd ~/dev/dbd/vitals && npm run lint && npm run typecheck && npm test
 
 **DO NOT touch:** `~/homelab/`, `docs/spec.md`, `docs/plan.md` (except ✅ markers)
 
-### Step 2 — DB schema + migrations
+### ✅ Step 2 — DB schema + migrations
 
 **Scope:** ONLY `~/dev/dbd/vitals/{migrations/,src/db.ts,package.json,docker-compose.yml}`
 
@@ -55,7 +55,7 @@ cd ~/dev/dbd/vitals && docker compose up -d && npm run migrate up && npm run lin
 
 **DO NOT touch:** `src/providers/`, `src/cli/`, `~/homelab/`
 
-### Step 3 — Oura client + OAuth token machinery
+### ✅ Step 3 — Oura client + OAuth token machinery
 
 **Scope:** ONLY `~/dev/dbd/vitals/src/{oauth.ts,tokens.ts,providers/oura/}` + tests
 

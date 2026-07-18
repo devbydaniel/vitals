@@ -16,5 +16,8 @@ export default defineConfig({
       },
     },
     include: ['src/**/*.{test,spec}.ts'],
+    // Integration tests share one local Postgres and run migrations in
+    // beforeAll — parallel test files race on the migration lock.
+    fileParallelism: false,
   },
 });
