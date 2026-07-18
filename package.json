@@ -1,6 +1,6 @@
 {
   "name": "vitals",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "Personal health data scraper + dashboards (Oura, extensible)",
   "type": "module",
   "engines": {

@@ -1,5 +1,13 @@
 # Changelog
 
+## [1.0.1](https://github.com/devbydaniel/vitals/compare/vitals-v1.0.0...vitals-v1.0.1) (2026-07-18)
+
+
+### Bug Fixes
+
+* batch heartrate upserts below wire-protocol param limit (VIT-11) ([270e507](https://github.com/devbydaniel/vitals/commit/270e507e8d7d77d056d603e90c8c1a03cb03f264))
+* use extapi scope names required by new-portal oauth apps (VIT-10) ([bee4ed7](https://github.com/devbydaniel/vitals/commit/bee4ed7e99f0748ec1340af37d1aa48ab6c92a2c))
+
 ## 1.0.0 (2026-07-18)
 
 
