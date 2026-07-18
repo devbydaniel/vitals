@@ -1,8 +1,13 @@
 export const OURA_BASE_URL = 'https://api.ouraring.com';
 export const OURA_AUTHORIZE_URL = 'https://cloud.ouraring.com/oauth/authorize';
 export const OURA_TOKEN_URL = 'https://api.ouraring.com/oauth/token';
+// Scope names for apps registered in the new developer portal
+// (developer.ouraring.com); the pre-2025 names (email, daily, spo2Daily, ...)
+// are invalid for these apps.
 export const OURA_SCOPES =
-  'email personal daily heartrate workout session tag spo2Daily';
+  'extapi:email extapi:personal extapi:daily extapi:heartrate extapi:tag ' +
+  'extapi:workout extapi:session extapi:spo2 extapi:ring_configuration ' +
+  'extapi:stress extapi:heart_health';
 
 export interface OuraEndpoint {
   /** Path segment under /v2/usercollection/ */
