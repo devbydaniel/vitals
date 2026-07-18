@@ -1,0 +1,66 @@
+name: Complexity Check
+
+on:
+  pull_request:
+    paths:
+      - '**/*.ts'
+
+jobs:
+  lizard:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
+
+      - name: Get changed TypeScript files
+        id: changed-files
+        uses: tj-actions/changed-files@v47
+        with:
+          files: |
+            **/*.ts
+
+      - name: Install Lizard
+        if: steps.changed-files.outputs.any_changed == 'true'
+        run: pip install lizard
+
+      - name: Check complexity of changed files
+        if: steps.changed-files.outputs.any_changed == 'true'
+        run: |
+          CCN_THRESHOLD=10
+          LENGTH_THRESHOLD=50
+          ARGS_THRESHOLD=5
+
+          FILTERED=$(echo "${{ steps.changed-files.outputs.all_changed_files }}" | tr ' ' '\n' \
+            | grep -v '/generated/' \
+            | grep -v '\.spec\.ts$' \
+            | grep -v '\.test\.ts$' \
+            | grep -v '/migrations/' \
+            || true)
+
+          if [ -z "$FILTERED" ]; then
+            echo "✅ No files to check"
+            exit 0
+          fi
+
+          echo "Checking:"
+          echo "$FILTERED" | sed 's/^/  - /'
+
+          RESULT=$(echo "$FILTERED" | tr '\n' ' ' | xargs lizard \
+            --CCN $CCN_THRESHOLD \
+            --length $LENGTH_THRESHOLD \
+            --arguments $ARGS_THRESHOLD \
+            --warnings_only \
+            2>&1) || true
+
+          if [ -n "$RESULT" ]; then
+            echo "❌ Complexity thresholds exceeded:"
+            echo "$RESULT"
+            exit 1
+          else
+            echo "✅ All functions within complexity thresholds"
+          fi
+
+      - name: No TypeScript files changed
+        if: steps.changed-files.outputs.any_changed != 'true'
+        run: echo "No TypeScript files changed, skipping."

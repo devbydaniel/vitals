@@ -1,0 +1,33 @@
+name: Security Audit
+
+on:
+  pull_request:
+    paths:
+      - '**/package-lock.json'
+      - '.github/workflows/security-audit.yml'
+  schedule:
+    - cron: '0 9 * * 1'
+
+jobs:
+  audit:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: .
+
+    steps:
+      - uses: actions/checkout@v6
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v6
+        with:
+          node-version-file: '.nvmrc'
+          cache: 'npm'
+          cache-dependency-path: ./package-lock.json
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Run security audit
+        run: npx better-npm-audit audit --level critical
+        continue-on-error: ${{ github.event_name == 'schedule' }}

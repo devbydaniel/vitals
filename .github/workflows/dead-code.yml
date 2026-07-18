@@ -1,0 +1,32 @@
+name: Dead Code
+
+on:
+  pull_request:
+    paths:
+      - '**/*.ts'
+      - '**/knip.json'
+      - '.github/workflows/dead-code.yml'
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: .
+
+    steps:
+      - uses: actions/checkout@v6
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v6
+        with:
+          node-version-file: '.nvmrc'
+          cache: 'npm'
+          cache-dependency-path: ./package-lock.json
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Check for dead code
+        run: npx knip --include files,dependencies,unlisted
+        continue-on-error: true

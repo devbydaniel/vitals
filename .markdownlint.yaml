@@ -1,0 +1,4 @@
+default: true
+MD013: false       # Line length — too noisy for docs
+MD033: false       # Inline HTML — needed for badges, details/summary
+MD041: false       # First line heading — not always applicable

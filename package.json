@@ -1,0 +1,41 @@
+{
+  "name": "vitals",
+  "version": "1.0.0",
+  "description": "Personal health data scraper + dashboards (Oura, extensible)",
+  "type": "module",
+  "engines": {
+    "node": ">=20"
+  },
+  "scripts": {
+    "build": "tsc",
+    "lint": "eslint src/",
+    "lint:fix": "eslint src/ --fix",
+    "format": "prettier --write 'src/**/*.ts'",
+    "format:check": "prettier --check 'src/**/*.ts'",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "test:coverage": "vitest run --coverage",
+    "typecheck": "tsc --noEmit",
+    "prepare": "husky"
+  },
+  "devDependencies": {
+    "@eslint/js": "9.22.0",
+    "@types/node": "22.13.10",
+    "@vitest/coverage-v8": "3.0.9",
+    "eslint": "9.22.0",
+    "eslint-config-prettier": "10.1.1",
+    "eslint-plugin-prettier": "5.2.5",
+    "eslint-plugin-security": "3.0.1",
+    "eslint-plugin-sonarjs": "3.0.2",
+    "eslint-plugin-unused-imports": "4.1.4",
+    "globals": "16.0.0",
+    "husky": "9.1.7",
+    "markdownlint-cli2": "0.17.2",
+    "prettier": "3.5.3",
+    "tsc-files": "1.1.4",
+    "tsx": "4.19.3",
+    "typescript": "5.8.2",
+    "typescript-eslint": "8.26.1",
+    "vitest": "3.0.9"
+  }
+}

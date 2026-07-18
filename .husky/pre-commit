@@ -1,0 +1,161 @@
+#!/usr/bin/env sh
+# Pre-commit hook — parallel checks for single-package Fastify projects
+RED="\033[31m"; GREEN="\033[32m"; YELLOW="\033[33m"; BOLD="\033[1m"; NC="\033[0m"
+print_section() {
+  printf "%b\n" "${BOLD}$1${NC}"
+  printf "%s\n" "────────────────────────────────────────"
+}
+
+START_TS=$(date +%s)
+
+STAGED_FILES=$(git diff --name-only --cached --diff-filter=ACMR)
+TS_STAGED=$(printf "%s" "$STAGED_FILES" | grep -E '^src/.*\.(ts|tsx)$' || true)
+MD_STAGED=$(printf "%s" "$STAGED_FILES" | grep -E '\.md$' || true)
+
+# Auto-fix mode
+PRECOMMIT_NO_FIX="${PRECOMMIT_NO_FIX:-0}"
+if [ "$PRECOMMIT_NO_FIX" != "1" ]; then
+  PRETTIER_ARGS="--write"
+  ESLINT_FIX_ARGS="--fix"
+else
+  PRETTIER_ARGS="--check --log-level warn"
+  ESLINT_FIX_ARGS=""
+fi
+
+GIT_DIR=$(git rev-parse --git-dir)
+STATUS_DIR="$GIT_DIR/.precommit-status"
+mkdir -p "$STATUS_DIR"
+
+run_prettier() {
+  STATUS_FILE="$STATUS_DIR/prettier.status"
+  print_section "Prettier (staged)"
+  set +e
+  printf "%s" "$TS_STAGED" | tr '\n' '\0' | xargs -0 npx --yes prettier $PRETTIER_ARGS
+  printf "%s" "$?" > "$STATUS_FILE"
+  set -e
+}
+
+run_eslint() {
+  STATUS_FILE="$STATUS_DIR/eslint.status"
+  print_section "ESLint (staged TS)"
+  set +e
+  printf "%s" "$TS_STAGED" | tr '\n' '\0' | xargs -0 npx --yes eslint --format stylish --max-warnings=0 --no-warn-ignored $ESLINT_FIX_ARGS
+  printf "%s" "$?" > "$STATUS_FILE"
+  set -e
+}
+
+run_tsc() {
+  STATUS_FILE="$STATUS_DIR/tsc.status"
+  print_section "TypeScript typecheck (staged TS)"
+  set +e
+  printf "%s" "$TS_STAGED" | tr '\n' '\0' | xargs -0 npx --yes tsc-files --noEmit -p tsconfig.json
+  printf "%s" "$?" > "$STATUS_FILE"
+  set -e
+}
+
+run_complexity() {
+  STATUS_FILE="$STATUS_DIR/complexity.status"
+  print_section "Complexity (staged TS)"
+  set +e
+  printf "%s" "$TS_STAGED" | tr '\n' ' ' | xargs ./scripts/check-complexity.sh
+  printf "%s" "$?" > "$STATUS_FILE"
+  set -e
+}
+
+run_file_size() {
+  STATUS_FILE="$STATUS_DIR/file_size.status"
+  print_section "File size (staged TS)"
+  set +e
+  # shellcheck disable=SC2086
+  ./scripts/check-file-size.sh $TS_STAGED
+  printf "%s" "$?" > "$STATUS_FILE"
+  set -e
+}
+
+run_gitleaks() {
+  STATUS_FILE="$STATUS_DIR/gitleaks.status"
+  print_section "Secret scan (staged)"
+  set +e
+  if command -v gitleaks >/dev/null 2>&1; then
+    gitleaks protect --staged --no-banner
+    printf "%s" "$?" > "$STATUS_FILE"
+  else
+    printf "%b\n" "${YELLOW}gitleaks not installed — skipping${NC}"
+    printf "0" > "$STATUS_FILE"
+  fi
+  set -e
+}
+
+run_markdownlint() {
+  STATUS_FILE="$STATUS_DIR/markdownlint.status"
+  print_section "Markdown lint (staged .md)"
+  set +e
+  # shellcheck disable=SC2086
+  npx --yes markdownlint-cli2 $MD_STAGED
+  printf "%s" "$?" > "$STATUS_FILE"
+  set -e
+}
+
+# Launch in parallel
+if [ -n "$TS_STAGED" ]; then
+  run_prettier &
+  run_eslint &
+  run_tsc &
+  run_complexity &
+  run_file_size &
+fi
+run_gitleaks &
+if [ -n "$MD_STAGED" ]; then
+  run_markdownlint &
+fi
+
+wait
+
+# Read statuses
+PRETTIER_STATUS=$(cat "$STATUS_DIR/prettier.status" 2>/dev/null || printf "0")
+ESLINT_STATUS=$(cat "$STATUS_DIR/eslint.status" 2>/dev/null || printf "0")
+TSC_STATUS=$(cat "$STATUS_DIR/tsc.status" 2>/dev/null || printf "0")
+COMPLEXITY_STATUS=$(cat "$STATUS_DIR/complexity.status" 2>/dev/null || printf "0")
+FILE_SIZE_STATUS=$(cat "$STATUS_DIR/file_size.status" 2>/dev/null || printf "0")
+GITLEAKS_STATUS=$(cat "$STATUS_DIR/gitleaks.status" 2>/dev/null || printf "0")
+MARKDOWNLINT_STATUS=$(cat "$STATUS_DIR/markdownlint.status" 2>/dev/null || printf "0")
+
+FAILED=0
+
+if [ -n "$TS_STAGED" ]; then
+  for CHECK in "PRETTIER:Prettier" "ESLINT:ESLint" "TSC:TypeScript" "COMPLEXITY:Complexity" "FILE_SIZE:File size"; do
+    VAR="${CHECK%%:*}_STATUS"; LABEL="${CHECK#*:}"
+    STATUS=$(eval echo "\$$VAR")
+    if [ "$STATUS" -ne 0 ]; then
+      printf "%b\n" "${RED}❌ ${LABEL} failed${NC}"; FAILED=1
+    else
+      printf "%b\n" "${GREEN}✅ ${LABEL} passed${NC}"
+    fi
+  done
+fi
+
+if [ "$GITLEAKS_STATUS" -ne 0 ]; then
+  printf "%b\n" "${RED}❌ Secret scan failed${NC}"; FAILED=1
+else
+  printf "%b\n" "${GREEN}✅ Secret scan passed${NC}"
+fi
+
+if [ -n "$MD_STAGED" ]; then
+  if [ "$MARKDOWNLINT_STATUS" -ne 0 ]; then
+    printf "%b\n" "${RED}❌ Markdown lint failed${NC}"; FAILED=1
+  else
+    printf "%b\n" "${GREEN}✅ Markdown lint passed${NC}"
+  fi
+fi
+
+END_TS=$(date +%s)
+ELAPSED=$((END_TS - START_TS))
+
+if [ "$FAILED" -ne 0 ]; then
+  printf "%b\n" "${RED}${BOLD}Pre-commit checks failed.${NC} Fix the issues above and try again."
+  printf "Completed in %ds\n" "$ELAPSED"
+  exit 1
+else
+  printf "%b\n" "${GREEN}${BOLD}All pre-commit checks passed.${NC} ✅"
+  printf "Completed in %ds\n" "$ELAPSED"
+fi

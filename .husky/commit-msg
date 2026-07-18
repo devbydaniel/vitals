@@ -1,0 +1,21 @@
+#!/usr/bin/env sh
+# Validate commit message conventions:
+# 1. Must start with a conventional commit type prefix
+# 2. Must include ticket ID with VIT- prefix
+
+MSG_FILE="$1"
+SUBJECT=$(grep -vE '^\s*#' "$MSG_FILE" | sed '/^\s*$/d' | head -n 1)
+
+echo "$SUBJECT" | grep -qiE '^(feat|feature|fix|chore|refactor|docs|style|perf|test|build|ci|revert|wip)(\(.+\))?:\s' || {
+  printf "\033[31mCommit message must start with a type (e.g., feat:, fix:, wip:, chore:, ...).\033[0m\n" >&2
+  printf "Examples:\n  feat: add new endpoint\n  fix: correct validation\n  wip: partial implementation\n" >&2
+  exit 1
+}
+
+if ! grep -vE '^\s*#' "$MSG_FILE" | grep -qi 'VIT-'; then
+  printf "\033[31mCommit message must include task ID with VIT- prefix (e.g., VIT-123).\033[0m\n" >&2
+  printf "Example: git commit --amend -m 'feat: validate input (VIT-123)'\n" >&2
+  exit 1
+fi
+
+exit 0
