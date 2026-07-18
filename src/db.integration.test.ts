@@ -74,6 +74,20 @@ describe('upsertDocument', () => {
 });
 
 describe('upsertHeartrate', () => {
+  it('handles batches larger than the wire-protocol-safe chunk', async () => {
+    const many = Array.from({ length: 12_000 }, (_, i) => ({
+      ts: new Date(Date.UTC(2020, 0, 1, 0, 0, i)).toISOString(),
+      source: 'bulk-test',
+      bpm: 50 + (i % 40),
+    }));
+    await upsertHeartrate(pool, many);
+    const res = await pool.query(
+      `SELECT count(*) FROM oura_heartrate WHERE source = 'bulk-test'`,
+    );
+    expect(Number(res.rows[0].count)).toBe(12_000);
+    await pool.query(`DELETE FROM oura_heartrate WHERE source = 'bulk-test'`);
+  });
+
   it('is idempotent by (ts, source)', async () => {
     const samples = [
       { ts: '2026-07-17T01:00:00Z', source: 'test', bpm: 52 },

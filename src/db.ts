@@ -58,7 +58,23 @@ export interface HeartrateSample {
   bpm: number;
 }
 
+// Postgres wire protocol chokes on very large bind-parameter counts; a 30-day
+// heartrate backfill chunk can hold >40k params in one statement. Batch it.
+const HEARTRATE_BATCH_SIZE = 5000;
+
 export async function upsertHeartrate(
+  client: pg.Pool | pg.PoolClient,
+  allSamples: HeartrateSample[],
+): Promise<void> {
+  for (let i = 0; i < allSamples.length; i += HEARTRATE_BATCH_SIZE) {
+    await upsertHeartrateBatch(
+      client,
+      allSamples.slice(i, i + HEARTRATE_BATCH_SIZE),
+    );
+  }
+}
+
+async function upsertHeartrateBatch(
   client: pg.Pool | pg.PoolClient,
   samples: HeartrateSample[],
 ): Promise<void> {
