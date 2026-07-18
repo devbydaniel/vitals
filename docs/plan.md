@@ -131,7 +131,7 @@ cd ~/dev/dbd/vitals && docker compose up -d && npm run migrate up && npm run lin
 
 **DO NOT touch:** `src/`, `~/homelab/`
 
-### Step 7 — Dockerfile + CI image publish
+### ✅ Step 7 — Dockerfile + CI image publish
 
 **Scope:** ONLY `~/dev/dbd/vitals/{Dockerfile,.github/workflows/,release-please-config.json,.release-please-manifest.json,package.json}`
 
@@ -147,7 +147,7 @@ cd ~/dev/dbd/vitals && npm run lint && npm run typecheck && npm test && docker b
 
 **DO NOT touch:** `src/` (except nothing), `migrations/`, `~/homelab/`
 
-### Step 8 — Homelab manifests
+### ✅ Step 8 — Homelab manifests
 
 **Scope:** ONLY `~/homelab/apps/vitals/` (new) + `~/homelab/apps/kustomization.yaml` (add one line)
 
@@ -169,7 +169,7 @@ kubectl kustomize ~/homelab/apps/vitals && sops -d ~/homelab/apps/vitals/secret.
 
 **DO NOT touch:** other `~/homelab/apps/*` dirs, `~/homelab/infrastructure/`, `~/dev/dbd/vitals/src/`
 
-### Step 9 — Grafana dashboards
+### ✅ Step 9 — Grafana dashboards
 
 **Scope:** ONLY `~/homelab/apps/vitals/dashboards/` (JSON) + the dashboard ConfigMap + `~/homelab/apps/vitals/kustomization.yaml` (configMapGenerator)
 
