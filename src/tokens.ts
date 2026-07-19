@@ -20,12 +20,18 @@ export async function saveTokenPair(
   );
 }
 
+/** Reuse the stored access token while it has at least this long to live. */
+const REFRESH_MARGIN_MS = 24 * 60 * 60 * 1000;
+
 /**
- * Refresh the provider's token pair and return a fresh access token.
+ * Return a valid access token, refreshing the pair only when the stored one
+ * is within REFRESH_MARGIN_MS of expiry (or has no known expiry). Sparse
+ * refreshes matter: refresh tokens are SINGLE-USE, and every rotation is a
+ * small crash-window that could burn the credential.
  *
- * Invariant: refresh tokens are SINGLE-USE. The new pair is committed to the
- * database BEFORE the access token is returned to any caller, so a crash after
- * the refresh can lose at most one sync run, never the credential.
+ * Invariant: when a refresh happens, the new pair is committed to the
+ * database BEFORE the access token is returned to any caller, so a crash
+ * after the refresh can lose at most one sync run, never the credential.
  */
 export async function getFreshAccessToken(
   pool: pg.Pool,
@@ -35,14 +41,26 @@ export async function getFreshAccessToken(
   const client = await pool.connect();
   try {
     await client.query('BEGIN');
-    const res = await client.query<{ refresh_token: string }>(
-      `SELECT refresh_token FROM tokens WHERE provider = $1 FOR UPDATE`,
+    const res = await client.query<{
+      access_token: string;
+      refresh_token: string;
+      expires_at: Date | null;
+    }>(
+      `SELECT access_token, refresh_token, expires_at FROM tokens WHERE provider = $1 FOR UPDATE`,
       [provider],
     );
     if (res.rows.length === 0) {
       throw new Error(
         `No tokens stored for provider "${provider}". Run the auth CLI first.`,
       );
+    }
+    const { access_token, expires_at } = res.rows[0];
+    if (
+      expires_at !== null &&
+      expires_at.getTime() - Date.now() > REFRESH_MARGIN_MS
+    ) {
+      await client.query('COMMIT');
+      return access_token;
     }
     const pair = await refreshTokenPair(
       config,

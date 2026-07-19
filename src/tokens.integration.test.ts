@@ -52,6 +52,51 @@ function tokenResponse(body: unknown, status = 200): Response {
 }
 
 describe('getFreshAccessToken', () => {
+  it('reuses the stored access token while far from expiry, without refreshing', async () => {
+    await saveTokenPair(pool, 'test-provider', {
+      accessToken: 'stored-access',
+      refreshToken: 'stored-refresh',
+      expiresAt: new Date(Date.now() + 20 * 24 * 3600 * 1000),
+    });
+    const fetchMock = vi.fn();
+    vi.stubGlobal('fetch', fetchMock);
+
+    const accessToken = await getFreshAccessToken(
+      pool,
+      'test-provider',
+      CONFIG,
+    );
+
+    expect(accessToken).toBe('stored-access');
+    expect(fetchMock).not.toHaveBeenCalled();
+  });
+
+  it('refreshes when the stored token is close to expiry', async () => {
+    await saveTokenPair(pool, 'test-provider', {
+      accessToken: 'old-access',
+      refreshToken: 'old-refresh',
+      expiresAt: new Date(Date.now() + 3600 * 1000),
+    });
+    vi.stubGlobal(
+      'fetch',
+      vi.fn().mockResolvedValue(
+        tokenResponse({
+          access_token: 'rotated-access',
+          refresh_token: 'rotated-refresh',
+          expires_in: 86400 * 30,
+        }),
+      ),
+    );
+
+    const accessToken = await getFreshAccessToken(
+      pool,
+      'test-provider',
+      CONFIG,
+    );
+
+    expect(accessToken).toBe('rotated-access');
+  });
+
   it('persists the rotated pair before returning the access token', async () => {
     await saveTokenPair(pool, 'test-provider', {
       accessToken: 'old-access',
