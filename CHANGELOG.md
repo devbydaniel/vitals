@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.2.0](https://github.com/devbydaniel/vitals/compare/vitals-v1.1.0...vitals-v1.2.0) (2026-07-19)
+
+
+### Features
+
+* training views — HR trends with rolling means, daily HR zones, workout log ([3fa1438](https://github.com/devbydaniel/vitals/commit/3fa143844a2789ee8824ee228a9dbc8f959edc6c))
+
 ## [1.1.0](https://github.com/devbydaniel/vitals/compare/vitals-v1.0.1...vitals-v1.1.0) (2026-07-19)
 
 
