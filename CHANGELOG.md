@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.1.0](https://github.com/devbydaniel/vitals/compare/vitals-v1.0.1...vitals-v1.1.0) (2026-07-19)
+
+
+### Features
+
+* reuse access token until near expiry — sparse refresh rotations for hourly sync (VIT-12) ([81dc97c](https://github.com/devbydaniel/vitals/commit/81dc97c6c4cfb1dafeb5328c48f98965ab893379))
+
 ## [1.0.1](https://github.com/devbydaniel/vitals/compare/vitals-v1.0.0...vitals-v1.0.1) (2026-07-18)
 
 
