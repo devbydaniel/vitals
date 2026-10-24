@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.3.0](https://github.com/devbydaniel/vitals/compare/vitals-v1.2.0...vitals-v1.3.0) (2026-10-24)
+
+
+### Features
+
+* day log tables and tracker role for daily context (office, own bed, meetings, coffee, drinks, people met) ([#5](https://github.com/devbydaniel/vitals/issues/5)) ([7c0bd14](https://github.com/devbydaniel/vitals/commit/7c0bd145c718f3f1e2950b5e7206a1805d0716f7))
+
 ## [1.2.0](https://github.com/devbydaniel/vitals/compare/vitals-v1.1.0...vitals-v1.2.0) (2026-07-19)
 
 
