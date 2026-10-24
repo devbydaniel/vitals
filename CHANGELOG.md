@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.4.0](https://github.com/devbydaniel/vitals/compare/vitals-v1.3.0...vitals-v1.4.0) (2026-10-24)
+
+
+### Features
+
+* trend views (value, 30d, 90d per metric; nights by the day before) and fix duplicate daily documents ([#7](https://github.com/devbydaniel/vitals/issues/7)) ([9200dfc](https://github.com/devbydaniel/vitals/commit/9200dfc275a8bb887f2b06059e71db95ead9554c))
+
 ## [1.3.0](https://github.com/devbydaniel/vitals/compare/vitals-v1.2.0...vitals-v1.3.0) (2026-10-24)
 
 
